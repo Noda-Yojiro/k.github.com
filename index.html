@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>根据网络知道国家和地区</title>
+    <style>
+      * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            transition: background-color 0.5s;
+            color: #fff;
+        }
+
+        #country-info {
+            margin-top: 30px;
+        }
+        h1 {
+            color: #36D;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: #BD53ED;
+            position: relative;
+        }
+
+        h1 span::before {
+            content: "";
+            height: 30px;
+            width: 2px;
+            position: absolute;
+            top: 50%;
+            right: -8px;
+            background: #BD53ED;
+            transform: translateY(-45%);
+            animation: blink 0.7s infinite;
+        }
+
+        h1 span.stop-blinking::before {
+            animation: none;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0 }
+        }
+    </style>
+</head>
+<body>
+  <h1>根据网络<span></span></h1>
+    <button onclick="getInfo()">获取当前地理位置信息</button>
+    <div id="location-info"></div>
+    <div id="country-info" style="color: #4db2ec;"></div>
+    <div id="time-info"></div>
+    <div id="province-info"></div>
+    <div id="city-info"></div>
+    <div id="district-info"></div>
+    <div id="street-info"></div>
+
+    <script>
+function getInfo() {
+  // 使用一个公开的IP地址查询API获取用户的IP地址
+  fetch('https://ipapi.co/json/')
+    .then((response) => response.json())
+    .then((data) => {
+      // 解析API返回的数据，获取国家和地区信息
+      const country = data.country_name;
+      const region = data.region;
+
+      // 更新页面显示国家和地区信息
+      const countryInfoDiv = document.getElementById('country-info');
+      countryInfoDiv.innerHTML = `
+          <p>您所在的国家：${country}</p>
+          <p>您所在的地区：${region}</p>
+      `;
+    })
+    .catch((error) => {
+      console.error('获取国家和地区信息失败：', error);
+    });
+
+  // 更新当前时间、日期和秒数
+  function updateTime() {
+    const currentTime = new Date();
+    const year = currentTime.getFullYear();
+    const month = currentTime.getMonth() + 1;
+    const day = currentTime.getDate();
+    const hour = currentTime.getHours();
+    const minute = currentTime.getMinutes();
+    const second = currentTime.getSeconds();
+
+    // 更新页面显示当前时间、日期和秒数
+    const timeInfoDiv = document.getElementById('time-info');
+    timeInfoDiv.innerHTML = `
+        <p>当前时间：${hour}:${minute}:${second}</p>
+        <p>当前日期：${year}年${month}月${day}日</p>
+    `;
+  }
+
+  // 初始化时间
+  updateTime();
+
+  // 每秒更新一次时间
+  setInterval(updateTime, 1000);
+
+  // 使用浏览器内置的Geolocation API获取经纬度
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // 更新页面显示经纬度信息
+      const locationInfoDiv = document.getElementById('location-info');
+      locationInfoDiv.innerHTML = `
+          <p>您所在的纬度：${latitude}</p>
+          <p>您所在的经度：${longitude}</p>
+      `;
+    },
+    (error) => {
+      console.error('获取经纬度信息失败：', error);
+    }
+  );
+}
+
+function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function changeBackgroundColor() {
+      var color = getRandomColor();
+      document.body.style.backgroundColor = color;
+    }
+
+    setInterval(changeBackgroundColor, 2000); // 5秒钟切换一次背景颜色
+
+    const dynamicText = document.querySelector("h1 span");
+const words = ["知道", "国家", "地区", "时间"];
+
+// Variables to track the position and deletion status of the word
+let wordIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+
+const typeEffect = () => {
+    const currentWord = words[wordIndex];
+    const currentChar = currentWord.substring(0, charIndex);
+    dynamicText.textContent = currentChar;
+    dynamicText.classList.add("stop-blinking");
+
+    if (!isDeleting && charIndex < currentWord.length) {
+        // If condition is true, type the next character
+        charIndex++;
+        setTimeout(typeEffect, 200);
+    } else if (isDeleting && charIndex > 0) {
+        // If condition is true, remove the previous character
+        charIndex--;
+        setTimeout(typeEffect, 100);
+    } else {
+        // If word is deleted then switch to the next word
+        isDeleting = !isDeleting;
+        dynamicText.classList.remove("stop-blinking");
+        wordIndex = !isDeleting ? (wordIndex + 1) % words.length : wordIndex;
+        setTimeout(typeEffect, 1200);
+    }
+}
+
+typeEffect();
+    </script>
+</body>
+</html>
